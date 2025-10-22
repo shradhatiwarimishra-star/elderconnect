@@ -7,7 +7,6 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
-from flask_marshmallow import Marshmallow
 from config import config
 import os
 
@@ -15,7 +14,6 @@ import os
 db = SQLAlchemy()
 migrate = Migrate()
 jwt = JWTManager()
-ma = Marshmallow()
 
 
 def create_app(config_name=None):
@@ -40,13 +38,12 @@ def create_app(config_name=None):
     db.init_app(app)
     migrate.init_app(app, db)
     jwt.init_app(app)
-    ma.init_app(app)
     CORS(app, origins=app.config['CORS_ORIGINS'], supports_credentials=True)
     
     # Create upload folder if it doesn't exist
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
     
-    # Import models (needed for migrations)
+    # Import models (needed for database table creation)
     from app.models import user, caregiver_profile, elder_profile, booking, review, payment
     
     # Register blueprints
