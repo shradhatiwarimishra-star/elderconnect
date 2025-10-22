@@ -4,7 +4,7 @@ import CaregiverCard from '../../components/CaregiverCard'
 import { MagnifyingGlassIcon, FunnelIcon } from '@heroicons/react/24/outline'
 
 const BrowseCaregivers = () => {
-  const [caregivers, setCaregiv ers] = useState([])
+  const [caregivers, setCaregivers] = useState([])
   const [loading, setLoading] = useState(true)
   const [filters, setFilters] = useState({
     service: '',
@@ -29,7 +29,7 @@ const BrowseCaregivers = () => {
       })
 
       const response = await api.get(`/elder/caregivers?${params}`)
-      setCaregiv ers(response.data.caregivers)
+      setCaregivers(response.data.caregivers)
     } catch (error) {
       console.error('Failed to fetch caregivers:', error)
     } finally {
