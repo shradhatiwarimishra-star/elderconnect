@@ -14,7 +14,11 @@ cd elderconnect
 docker-compose up --build
 ```
 
-Wait for the message: `Running on http://0.0.0.0:5000`
+Wait for these messages:
+- `Database initialization complete!`
+- `Running on http://0.0.0.0:5000`
+
+**Note:** The first time you run this, it will automatically create all database tables!
 
 ### Step 2: Open the Application (10 seconds)
 Open your browser to: **http://localhost:5173**
@@ -130,6 +134,20 @@ curl -X POST http://localhost:5000/api/auth/register \
 
 ## 🆘 Quick Troubleshooting
 
+### ❌ Error: "No such command 'db'" or Database Issues
+
+**Quick Fix:**
+```bash
+# Run the auto-fix script
+./quick-fix.sh
+
+# OR manually:
+docker-compose down -v
+docker-compose up --build
+```
+
+The database tables are created automatically by `init_db.py` on startup!
+
 ### Ports Already in Use?
 ```bash
 # Kill processes on ports
@@ -149,6 +167,9 @@ docker-compose up --build
 - Check if backend is running: http://localhost:5000/api/health
 - Clear browser cache
 - Try incognito/private window
+
+### Need More Help?
+See the comprehensive **TROUBLESHOOTING.md** guide for detailed solutions.
 
 ## 📚 Next Steps
 

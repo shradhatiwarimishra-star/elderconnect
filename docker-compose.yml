@@ -47,7 +47,7 @@ services:
     networks:
       - elderconnect_network
     command: >
-      sh -c "flask db upgrade &&
+      sh -c "python init_db.py &&
              python run.py"
 
   # React Frontend
