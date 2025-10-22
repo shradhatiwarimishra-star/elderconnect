@@ -1,0 +1,82 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  db:
+    image: postgres:15-alpine
+    container_name: elderconnect_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: elderconnect_db
+      POSTGRES_USER: elderconnect_user
+      POSTGRES_PASSWORD: elderconnect_pass
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - elderconnect_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U elderconnect_user -d elderconnect_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Flask Backend
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: elderconnect_backend
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      FLASK_APP: run.py
+      FLASK_ENV: development
+      DATABASE_URL: postgresql://elderconnect_user:elderconnect_pass@db:5432/elderconnect_db
+      SECRET_KEY: your-super-secret-key-change-this
+      JWT_SECRET_KEY: your-jwt-secret-key-change-this
+      FRONTEND_URL: http://localhost:5173
+    volumes:
+      - ./backend:/app
+      - backend_uploads:/app/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - elderconnect_network
+    command: >
+      sh -c "flask db upgrade &&
+             python run.py"
+
+  # React Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_URL=http://localhost:5000
+    container_name: elderconnect_frontend
+    restart: unless-stopped
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - VITE_API_URL=http://localhost:5000
+    depends_on:
+      - backend
+    networks:
+      - elderconnect_network
+    stdin_open: true
+    tty: true
+
+volumes:
+  postgres_data:
+  backend_uploads:
+
+networks:
+  elderconnect_network:
+    driver: bridge
