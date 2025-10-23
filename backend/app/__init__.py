@@ -39,13 +39,16 @@ def create_app(config_name=None):
     migrate.init_app(app, db)
     jwt.init_app(app)
     
-    # Configure CORS with proper settings for JWT
+    # Configure CORS with proper settings for JWT (more permissive for development)
     CORS(app, 
-         origins=app.config['CORS_ORIGINS'], 
-         supports_credentials=True,
-         allow_headers=['Content-Type', 'Authorization'],
-         expose_headers=['Content-Type', 'Authorization'],
-         methods=['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'])
+         resources={r"/api/*": {
+             "origins": app.config['CORS_ORIGINS'],
+             "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+             "allow_headers": ["Content-Type", "Authorization", "Access-Control-Allow-Credentials"],
+             "expose_headers": ["Content-Type", "Authorization"],
+             "supports_credentials": True,
+             "max_age": 3600
+         }})
     
     # Create upload folder if it doesn't exist
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)

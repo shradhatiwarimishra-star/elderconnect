@@ -29,6 +29,12 @@ api.interceptors.response.use(
   async (error) => {
     const originalRequest = error.config
 
+    // Handle network errors (CORS issues)
+    if (!error.response) {
+      console.error('Network error - possible CORS issue:', error.message)
+      return Promise.reject(error)
+    }
+
     // If error is 401 and we haven't tried to refresh token yet
     if (error.response?.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true
@@ -54,12 +60,19 @@ api.interceptors.response.use(
           return api(originalRequest)
         }
       } catch (refreshError) {
-        // Refresh failed, logout user
-        localStorage.removeItem('access_token')
-        localStorage.removeItem('refresh_token')
-        window.location.href = '/login'
+        // Only logout if refresh actually failed (not a network error)
+        if (refreshError.response) {
+          localStorage.removeItem('access_token')
+          localStorage.removeItem('refresh_token')
+          window.location.href = '/login'
+        }
         return Promise.reject(refreshError)
       }
+    }
+
+    // For 403 errors, don't logout - just show the error
+    if (error.response?.status === 403) {
+      console.error('Permission denied:', error.response.data)
     }
 
     return Promise.reject(error)
