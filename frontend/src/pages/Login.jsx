@@ -10,15 +10,24 @@ const Login = () => {
   const { login } = useAuth()
 
   const handleSubmit = async (e) => {
+    console.log('🔵 Form submitted')
     e.preventDefault()
+    console.log('🔵 preventDefault called')
+    console.log('🔵 Email:', email)
+    console.log('🔵 Password length:', password.length)
     setError('')
     setLoading(true)
 
     try {
+      console.log('🔵 Calling login function...')
       await login(email, password)
+      console.log('🔵 Login function completed')
     } catch (err) {
+      console.log('🔴 Login error:', err)
+      console.log('🔴 Error response:', err.response?.data)
       setError(err.response?.data?.error || 'Failed to login')
     } finally {
+      console.log('🔵 Setting loading = false')
       setLoading(false)
     }
   }
