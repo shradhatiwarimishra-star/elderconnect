@@ -2,7 +2,7 @@
 ElderConnect Application Factory
 Initializes Flask application with all extensions and blueprints.
 """
-from flask import Flask
+from flask import Flask, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_jwt_extended import JWTManager
@@ -38,7 +38,14 @@ def create_app(config_name=None):
     db.init_app(app)
     migrate.init_app(app, db)
     jwt.init_app(app)
-    CORS(app, origins=app.config['CORS_ORIGINS'], supports_credentials=True)
+    
+    # Configure CORS with proper settings for JWT
+    CORS(app, 
+         origins=app.config['CORS_ORIGINS'], 
+         supports_credentials=True,
+         allow_headers=['Content-Type', 'Authorization'],
+         expose_headers=['Content-Type', 'Authorization'],
+         methods=['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'])
     
     # Create upload folder if it doesn't exist
     os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
@@ -59,6 +66,28 @@ def create_app(config_name=None):
     @app.route('/api/health')
     def health_check():
         return {'status': 'healthy', 'service': 'ElderConnect API'}, 200
+    
+    # JWT error handlers (prevent redirects)
+    @jwt.unauthorized_loader
+    def unauthorized_callback(callback):
+        return jsonify({
+            'error': 'Missing or invalid token',
+            'message': 'Authorization required'
+        }), 401
+    
+    @jwt.invalid_token_loader
+    def invalid_token_callback(callback):
+        return jsonify({
+            'error': 'Invalid token',
+            'message': 'Token verification failed'
+        }), 401
+    
+    @jwt.expired_token_loader
+    def expired_token_callback(jwt_header, jwt_payload):
+        return jsonify({
+            'error': 'Token expired',
+            'message': 'Please login again'
+        }), 401
     
     # Error handlers
     @app.errorhandler(404)
