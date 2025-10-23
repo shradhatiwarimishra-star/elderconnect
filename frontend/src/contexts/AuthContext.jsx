@@ -26,13 +26,13 @@ export const AuthProvider = ({ children }) => {
     
     if (token) {
       console.log('📡 Fetching current user...')
-      // Try to fetch user, but don't block if it fails
-      fetchCurrentUser().catch((error) => {
-        console.log('⚠️ Failed to fetch user, but keeping session:', error.message)
-        // If fetch fails, just set loading to false
-        // User might still be valid, tokens are in localStorage
-        setLoading(false)
-      })
+      // TEMPORARILY DISABLED - just set loading false
+      // fetchCurrentUser().catch((error) => {
+      //   console.log('⚠️ Failed to fetch user, but keeping session:', error.message)
+      //   setLoading(false)
+      // })
+      console.log('⚠️ AUTO-FETCH DISABLED FOR DEBUGGING')
+      setLoading(false)
     } else {
       console.log('❌ No token, user not logged in')
       setLoading(false)
