@@ -29,6 +29,9 @@ def create_app(config_name=None):
     """
     app = Flask(__name__)
     
+    # Disable strict slashes to prevent 308 redirects (fixes CORS preflight)
+    app.url_map.strict_slashes = False
+    
     # Load configuration
     if config_name is None:
         config_name = os.getenv('FLASK_ENV', 'development')
