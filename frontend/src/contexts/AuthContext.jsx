@@ -19,47 +19,66 @@ export const AuthProvider = ({ children }) => {
   const navigate = useNavigate()
 
   useEffect(() => {
+    console.log('🔄 AuthContext mounted, checking for existing session')
     // Check if user is logged in on mount
     const token = localStorage.getItem('access_token')
+    console.log('🔑 Token in localStorage:', token ? 'EXISTS' : 'NONE')
+    
     if (token) {
+      console.log('📡 Fetching current user...')
       // Try to fetch user, but don't block if it fails
-      fetchCurrentUser().catch(() => {
+      fetchCurrentUser().catch((error) => {
+        console.log('⚠️ Failed to fetch user, but keeping session:', error.message)
         // If fetch fails, just set loading to false
         // User might still be valid, tokens are in localStorage
         setLoading(false)
       })
     } else {
+      console.log('❌ No token, user not logged in')
       setLoading(false)
     }
   }, [])
 
   const fetchCurrentUser = async () => {
     try {
+      console.log('📞 Calling /auth/me...')
       const response = await api.get('/auth/me')
+      console.log('✅ Got user from /auth/me:', response.data.user)
       setUser(response.data.user)
       setProfile(response.data.profile)
     } catch (error) {
-      console.error('Failed to fetch user:', error)
+      console.error('❌ Failed to fetch user:', error.message)
+      console.error('Status:', error.response?.status)
       // Only logout if it's an auth error (401), not network/CORS errors
       if (error.response?.status === 401) {
+        console.log('🚪 Logging out due to 401')
         logout()
+      } else {
+        console.log('⚠️ Not logging out, just a network error')
       }
     } finally {
+      console.log('✅ Setting loading = false')
       setLoading(false)
     }
   }
 
   const login = async (email, password) => {
+    console.log('🔐 Login attempt for:', email)
     const response = await api.post('/auth/login', { email, password })
+    console.log('✅ Login response:', response.data)
+    
     const { user, profile, access_token, refresh_token } = response.data
     
+    console.log('💾 Saving tokens to localStorage')
     localStorage.setItem('access_token', access_token)
     localStorage.setItem('refresh_token', refresh_token)
     
+    console.log('👤 Setting user:', user)
     setUser(user)
     setProfile(profile)
     
     // Redirect based on role
+    console.log('🚀 Redirecting to dashboard for role:', user.role)
     if (user.role === 'elder') {
       navigate('/elder/dashboard')
     } else if (user.role === 'caregiver') {
