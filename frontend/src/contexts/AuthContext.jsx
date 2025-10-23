@@ -22,7 +22,12 @@ export const AuthProvider = ({ children }) => {
     // Check if user is logged in on mount
     const token = localStorage.getItem('access_token')
     if (token) {
-      fetchCurrentUser()
+      // Try to fetch user, but don't block if it fails
+      fetchCurrentUser().catch(() => {
+        // If fetch fails, just set loading to false
+        // User might still be valid, tokens are in localStorage
+        setLoading(false)
+      })
     } else {
       setLoading(false)
     }
@@ -35,7 +40,10 @@ export const AuthProvider = ({ children }) => {
       setProfile(response.data.profile)
     } catch (error) {
       console.error('Failed to fetch user:', error)
-      logout()
+      // Only logout if it's an auth error (401), not network/CORS errors
+      if (error.response?.status === 401) {
+        logout()
+      }
     } finally {
       setLoading(false)
     }
