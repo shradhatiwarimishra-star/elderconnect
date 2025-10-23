@@ -17,7 +17,7 @@ bp = Blueprint('payments', __name__)
 @jwt_required()
 def get_payment(payment_id):
     """Get payment details"""
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
     payment = Payment.query.get(payment_id)
     
     if not payment:
@@ -50,7 +50,7 @@ def process_payment():
     NOTE: This is a mock implementation.
     In production, integrate with actual payment gateway (Stripe, PayPal, etc.)
     """
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
     data = request.get_json()
     
     if 'booking_id' not in data:
@@ -126,7 +126,7 @@ def refund_payment(payment_id):
         "amount": 100.00  (optional, partial refund)
     }
     """
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
     payment = Payment.query.get(payment_id)
     
     if not payment:
@@ -178,7 +178,7 @@ def refund_payment(payment_id):
 @jwt_required()
 def get_payment_history():
     """Get payment history for current user"""
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
     
     # Get all bookings for user
     bookings = Booking.query.filter(
@@ -214,7 +214,7 @@ def create_payment_intent():
         "booking_id": 123
     }
     """
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
     data = request.get_json()
     
     if 'booking_id' not in data:

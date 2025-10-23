@@ -91,9 +91,9 @@ def register():
         
         db.session.commit()
         
-        # Generate tokens
-        access_token = create_access_token(identity=user.id)
-        refresh_token = create_refresh_token(identity=user.id)
+        # Generate tokens (identity must be string)
+        access_token = create_access_token(identity=str(user.id))
+        refresh_token = create_refresh_token(identity=str(user.id))
         
         return jsonify({
             'message': 'User registered successfully',
@@ -135,9 +135,9 @@ def login():
     if not user.is_active:
         return jsonify({'error': 'Account is inactive'}), 403
     
-    # Generate tokens
-    access_token = create_access_token(identity=user.id)
-    refresh_token = create_refresh_token(identity=user.id)
+    # Generate tokens (identity must be string)
+    access_token = create_access_token(identity=str(user.id))
+    refresh_token = create_refresh_token(identity=str(user.id))
     
     # Get profile data based on role
     profile_data = None
@@ -173,7 +173,7 @@ def get_current_user():
     """
     Get current logged-in user information
     """
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
     user = User.query.get(current_user_id)
     
     if not user:
@@ -198,7 +198,7 @@ def update_profile():
     """
     Update user profile information
     """
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
     user = User.query.get(current_user_id)
     
     if not user:
@@ -234,7 +234,7 @@ def upload_kyc():
     """
     Upload KYC document
     """
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
     user = User.query.get(current_user_id)
     
     if not user:
@@ -274,7 +274,7 @@ def change_password():
     """
     Change user password
     """
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
     user = User.query.get(current_user_id)
     
     if not user:

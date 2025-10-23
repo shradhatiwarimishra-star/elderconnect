@@ -37,7 +37,7 @@ def create_booking():
         "elder_notes": "Special instructions"
     }
     """
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
     data = request.get_json()
     
     # Validate required fields
@@ -122,7 +122,7 @@ def create_booking():
 @jwt_required()
 def get_bookings():
     """Get bookings for current user (elder or caregiver)"""
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
     user = User.query.get(current_user_id)
     
     if user.role == 'elder':
@@ -153,7 +153,7 @@ def get_bookings():
 @jwt_required()
 def get_booking(booking_id):
     """Get specific booking details"""
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
     booking = Booking.query.get(booking_id)
     
     if not booking:
@@ -172,7 +172,7 @@ def get_booking(booking_id):
 @jwt_required()
 def cancel_booking(booking_id):
     """Cancel a booking"""
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
     booking = Booking.query.get(booking_id)
     
     if not booking:

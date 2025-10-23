@@ -19,7 +19,7 @@ bp = Blueprint('caregiver', __name__)
 @role_required('caregiver')
 def get_profile():
     """Get caregiver profile"""
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
     user = User.query.get(current_user_id)
     
     if not user.caregiver_profile:
@@ -36,7 +36,7 @@ def get_profile():
 @role_required('caregiver')
 def update_profile():
     """Update caregiver profile"""
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
     user = User.query.get(current_user_id)
     
     if not user.caregiver_profile:
@@ -90,7 +90,7 @@ def update_profile():
 @role_required('caregiver')
 def get_dashboard():
     """Get caregiver dashboard statistics"""
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
     
     # Get booking statistics
     total_bookings = Booking.query.filter_by(caregiver_id=current_user_id).count()
@@ -137,7 +137,7 @@ def get_bookings():
     - status: Filter by status (pending, confirmed, completed, cancelled)
     - upcoming: Boolean to filter upcoming bookings
     """
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
     
     query = Booking.query.filter_by(caregiver_id=current_user_id)
     
@@ -163,7 +163,7 @@ def get_bookings():
 @role_required('caregiver')
 def accept_booking(booking_id):
     """Accept a pending booking"""
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
     
     booking = Booking.query.get(booking_id)
     
@@ -195,7 +195,7 @@ def accept_booking(booking_id):
 @role_required('caregiver')
 def complete_booking(booking_id):
     """Mark booking as completed"""
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
     
     booking = Booking.query.get(booking_id)
     
@@ -238,7 +238,7 @@ def complete_booking(booking_id):
 @role_required('caregiver')
 def update_availability():
     """Update caregiver availability status"""
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
     user = User.query.get(current_user_id)
     
     if not user.caregiver_profile:

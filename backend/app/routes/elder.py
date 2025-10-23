@@ -20,7 +20,7 @@ bp = Blueprint('elder', __name__)
 @role_required('elder')
 def get_profile():
     """Get elder profile"""
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
     user = User.query.get(current_user_id)
     
     if not user.elder_profile:
@@ -37,7 +37,7 @@ def get_profile():
 @role_required('elder')
 def update_profile():
     """Update elder profile"""
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
     user = User.query.get(current_user_id)
     
     if not user.elder_profile:
