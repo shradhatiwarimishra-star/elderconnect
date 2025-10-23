@@ -72,6 +72,7 @@ def create_app(config_name=None):
     # JWT error handlers (prevent redirects)
     @jwt.unauthorized_loader
     def unauthorized_callback(callback):
+        print(f"⚠️ JWT UNAUTHORIZED: {callback}")
         return jsonify({
             'error': 'Missing or invalid token',
             'message': 'Authorization required'
@@ -79,6 +80,7 @@ def create_app(config_name=None):
     
     @jwt.invalid_token_loader
     def invalid_token_callback(callback):
+        print(f"⚠️ JWT INVALID TOKEN: {callback}")
         return jsonify({
             'error': 'Invalid token',
             'message': 'Token verification failed'
@@ -86,6 +88,7 @@ def create_app(config_name=None):
     
     @jwt.expired_token_loader
     def expired_token_callback(jwt_header, jwt_payload):
+        print(f"⚠️ JWT EXPIRED: {jwt_payload}")
         return jsonify({
             'error': 'Token expired',
             'message': 'Please login again'
