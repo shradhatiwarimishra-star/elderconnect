@@ -2,7 +2,9 @@ import { Link } from 'react-router-dom'
 import { StarIcon, MapPinIcon, CurrencyDollarIcon } from '@heroicons/react/24/solid'
 
 const CaregiverCard = ({ caregiver }) => {
-  const { user, profile } = caregiver
+  // Handle different API response structures
+  const user = caregiver.user || {}
+  const profile = caregiver.profile || caregiver || {}
 
   return (
     <div className="card hover:shadow-xl transition-shadow duration-200">
@@ -28,7 +30,7 @@ const CaregiverCard = ({ caregiver }) => {
         <div className="flex-1">
           <div className="flex items-center justify-between">
             <h3 className="text-xl font-semibold text-gray-900">{user.name}</h3>
-            {profile.verified && (
+            {profile?.verified && (
               <span className="badge-success">✓ Verified</span>
             )}
           </div>
@@ -59,24 +61,29 @@ const CaregiverCard = ({ caregiver }) => {
 
           {/* Details */}
           <div className="mt-3 flex flex-wrap gap-4">
-            {profile.city && (
+            {profile?.city && (
               <div className="flex items-center text-sm text-gray-600">
                 <MapPinIcon className="h-4 w-4 mr-1" />
                 {profile.city}, {profile.state}
               </div>
             )}
-            <div className="flex items-center text-sm text-gray-600">
-              <CurrencyDollarIcon className="h-4 w-4 mr-1" />
-              ${profile.rate_per_hour}/hour
-            </div>
+            {profile?.rate_per_hour && (
+              <div className="flex items-center text-sm text-gray-600">
+                <CurrencyDollarIcon className="h-4 w-4 mr-1" />
+                ${profile.rate_per_hour}/hour
+              </div>
+            )}
           </div>
 
           {/* Services */}
-          {profile.services_offered && profile.services_offered.length > 0 && (
+          {profile?.services_offered && (
             <div className="mt-3 flex flex-wrap gap-2">
-              {profile.services_offered.map((service, index) => (
+              {(typeof profile.services_offered === 'string' 
+                ? profile.services_offered.split(',') 
+                : profile.services_offered
+              ).map((service, index) => (
                 <span key={index} className="badge-info">
-                  {service.replace('_', ' ')}
+                  {service.replace(/_/g, ' ').trim()}
                 </span>
               ))}
             </div>
