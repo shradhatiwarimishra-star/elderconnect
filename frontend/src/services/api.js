@@ -1,0 +1,92 @@
+import axios from 'axios'
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000'
+
+console.log('🌐 API Configuration:')
+console.log('  VITE_API_URL from env:', import.meta.env.VITE_API_URL)
+console.log('  Using API_URL:', API_URL)
+console.log('  Full baseURL:', `${API_URL}/api`)
+
+const api = axios.create({
+  baseURL: `${API_URL}/api`,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+})
+
+// Request interceptor to add auth token
+api.interceptors.request.use(
+  (config) => {
+    console.log('📤 Outgoing request:', config.method.toUpperCase(), config.url)
+    const token = localStorage.getItem('access_token')
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`
+      console.log('  ✓ Token attached')
+    } else {
+      console.log('  ℹ No token')
+    }
+    return config
+  },
+  (error) => {
+    console.error('❌ Request interceptor error:', error)
+    return Promise.reject(error)
+  }
+)
+
+// Response interceptor to handle token refresh
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config
+
+    // Handle network errors (CORS issues)
+    if (!error.response) {
+      console.error('Network error - possible CORS issue:', error.message)
+      return Promise.reject(error)
+    }
+
+    // If error is 401 and we haven't tried to refresh token yet
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true
+
+      try {
+        const refreshToken = localStorage.getItem('refresh_token')
+        if (refreshToken) {
+          const response = await axios.post(
+            `${API_URL}/api/auth/refresh`,
+            {},
+            {
+              headers: {
+                Authorization: `Bearer ${refreshToken}`,
+              },
+            }
+          )
+
+          const { access_token } = response.data
+          localStorage.setItem('access_token', access_token)
+
+          // Retry original request with new token
+          originalRequest.headers.Authorization = `Bearer ${access_token}`
+          return api(originalRequest)
+        }
+      } catch (refreshError) {
+        // Only logout if refresh actually failed (not a network error)
+        if (refreshError.response) {
+          localStorage.removeItem('access_token')
+          localStorage.removeItem('refresh_token')
+          window.location.href = '/login'
+        }
+        return Promise.reject(refreshError)
+      }
+    }
+
+    // For 403 errors, don't logout - just show the error
+    if (error.response?.status === 403) {
+      console.error('Permission denied:', error.response.data)
+    }
+
+    return Promise.reject(error)
+  }
+)
+
+export default api
